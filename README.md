@@ -1,1 +1,22 @@
-# Physical-world-perception-
+# Physical World Perception
+
+SeeTime 用 AI 制作的代码作品存档（私有）。
+
+| 目录 | 作品 | 说明 | 在线版本 |
+|---|---|---|---|
+| `world-now/` | 世界此刻 | 世界感知数据集网站：汇集全球公开实时传感器数据（摄像头、航班、船舶、卫星等） | [打开](https://claude.ai/code/artifact/03a7e07c-536f-447a-a626-864919dfb7f7) |
+| `video/voiceover-studio/` | 配音工作台 | 《让世界训练智能》视频的配音制作工具 | [打开](https://claude.ai/code/artifact/1d1f938a-7528-47d5-8d94-bdfdec57400d) |
+| `marketing-board/` | 内容进展看板 | 营销工作看板：视频、手册、方案等内容的制作进度 | [打开](https://claude.ai/code/artifact/f3d1c405-793b-4915-9733-01e23e5fd8a2) |
+
+## 使用方法
+
+每个作品都是单个 `index.html` 文件，用浏览器直接打开即可查看。
+
+## 注意
+
+- 内容进展看板的进度数据保存在在线版本自带的数据库里，这里只存页面代码。离线打开时，页面会提示无法读取数据。
+- 视频渲染画面和脚本（在本地电脑上制作）待补充到 `video/` 目录。
+
+## 更新记录
+
+- 2026-10-19：首次存档

@@ -1,0 +1,323 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>配音工作台</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@600&family=Noto+Sans+SC:wght@400;500;700&family=JetBrains+Mono:wght@400;600&display=swap">
+<style>
+/* Layout: a single working column like a mixing-desk channel list — script lines are channels, each with its own take. */
+:root{
+  --bg:#eef1f3; --surface:#ffffff; --ink:#18212b; --muted:#5d6b78; --line:#d5dce2;
+  --accent:#0f6e78; --accent-soft:#e1f0f1; --rec:#c9342b; --ok:#2f8a57; --warn:#a86a12; --wave:#0f6e78;
+  --display:"Noto Serif SC","Songti SC",serif;
+  --body:"Noto Sans SC","PingFang SC","Microsoft YaHei",system-ui,sans-serif;
+  --mono:"JetBrains Mono",ui-monospace,Menlo,monospace;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#0f1418; --surface:#172027; --ink:#e6edf2; --muted:#93a3b0; --line:#26323b;
+  --accent:#4fc1c9; --accent-soft:#163238; --rec:#ff6a5e; --ok:#5fca8a; --warn:#e2a54a; --wave:#4fc1c9; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#0f1418; --surface:#172027; --ink:#e6edf2; --muted:#93a3b0; --line:#26323b;
+  --accent:#4fc1c9; --accent-soft:#163238; --rec:#ff6a5e; --ok:#5fca8a; --warn:#e2a54a; --wave:#4fc1c9; color-scheme:dark}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font-family:var(--body);font-size:15px;line-height:1.6;
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:28px 120px}
+.wrap{max-width:980px;margin:0 auto;display:flex;flex-direction:column;gap:22px}
+h1{font-family:var(--display);font-size:30px;font-weight:600;margin:0;letter-spacing:.02em;text-wrap:balance}
+.sub{color:var(--muted);margin:4px 0 0;max-width:62ch}
+.steps{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
+.step{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:14px 16px;min-width:0}
+.step b{display:block;font-size:13px;color:var(--accent);letter-spacing:.06em;margin-bottom:2px}
+.step p{margin:0;color:var(--muted);font-size:14px}
+@media (max-width:720px){.steps{grid-template-columns:1fr}}
+.bar{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
+.bar .grow{flex:1}
+button,.btn{font:inherit;font-size:14px;border:1px solid var(--line);background:var(--surface);color:var(--ink);
+  border-radius:8px;padding:7px 12px;cursor:pointer;display:inline-flex;align-items:center;gap:6px;white-space:nowrap}
+button:hover,.btn:hover{border-color:var(--accent)}
+button:focus-visible,.btn:focus-within,textarea:focus-visible,input:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+button.primary{background:var(--accent);border-color:var(--accent);color:var(--surface);font-weight:600}
+button.rec{color:var(--rec)} button.rec.on{background:var(--rec);border-color:var(--rec);color:var(--surface)}
+button:disabled{opacity:.45;cursor:not-allowed}
+.btn input{display:none}
+.settings{display:flex;flex-wrap:wrap;gap:18px;background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:12px 16px}
+.settings label{display:flex;align-items:center;gap:8px;font-size:14px;color:var(--muted)}
+.settings input[type=range]{width:120px;accent-color:var(--accent)}
+.settings output{font-family:var(--mono);font-size:13px;color:var(--ink);min-width:3.6em}
+details{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:10px 16px}
+summary{cursor:pointer;font-weight:500}
+textarea{width:100%;min-height:220px;margin-top:10px;font:inherit;font-size:14px;line-height:1.7;border:1px solid var(--line);border-radius:8px;padding:10px;background:var(--bg);color:var(--ink);resize:vertical}
+.hint{font-size:13px;color:var(--muted)}
+.progress{display:flex;align-items:center;gap:12px;font-size:14px}
+.meter{flex:1;height:6px;border-radius:3px;background:var(--line);overflow:hidden;min-width:80px}
+.meter i{display:block;height:100%;background:var(--ok);width:0;transition:width .3s}
+.mono{font-family:var(--mono);font-variant-numeric:tabular-nums}
+.lines{display:flex;flex-direction:column;gap:0;background:var(--surface);border:1px solid var(--line);border-radius:10px;overflow:hidden}
+.row{display:grid;grid-template-columns:2.4em minmax(0,1fr) auto;gap:6px 12px;padding:12px 14px;border-top:1px solid var(--line);align-items:start}
+.row.para{border-top:6px solid var(--bg)}
+.row:first-child{border-top:0}
+.row.drag{background:var(--accent-soft)}
+.row.playing{background:var(--accent-soft)}
+.num{font-family:var(--mono);color:var(--muted);font-size:13px;padding-top:2px}
+.txt{min-width:0}
+.txt p{margin:0}
+.meta{display:flex;align-items:center;gap:10px;margin-top:6px;min-height:28px}
+.chip{font-size:12px;border-radius:999px;padding:1px 9px;border:1px solid var(--line);color:var(--muted);white-space:nowrap}
+.chip.ok{color:var(--ok);border-color:currentColor}
+canvas.wave{width:180px;height:28px;display:block;max-width:100%}
+.src{font-size:12px;color:var(--muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-width:0}
+.acts{display:flex;flex-wrap:wrap;gap:6px;justify-content:flex-end;max-width:260px}
+.acts button,.acts .btn{padding:5px 9px;font-size:13px}
+@media (max-width:640px){.row{grid-template-columns:2em minmax(0,1fr)}.acts{grid-column:2;justify-content:flex-start;max-width:none}}
+.dock{position:fixed;left:0;right:0;bottom:0;background:var(--surface);border-top:1px solid var(--line);
+  padding:12px max(16px,env(safe-area-inset-right,0px)) calc(12px + env(safe-area-inset-bottom,0px)) max(16px,env(safe-area-inset-left,0px))}
+.dock .in{max-width:980px;margin:0 auto;display:flex;flex-wrap:wrap;gap:10px;align-items:center}
+.toast{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(84px + env(safe-area-inset-bottom,0px));background:var(--ink);color:var(--bg);
+  padding:9px 16px;border-radius:8px;font-size:14px;max-width:min(92vw,560px);z-index:9}
+.drop{border:1.5px dashed var(--line);border-radius:10px;padding:14px 16px;text-align:center;color:var(--muted);font-size:14px}
+.drop.drag{border-color:var(--accent);color:var(--accent);background:var(--accent-soft)}
+@media (prefers-reduced-motion:reduce){.meter i{transition:none}}
+</style>
+
+<div class="wrap">
+  <header>
+    <h1>配音工作台</h1>
+    <p class="sub">把配音稿逐句交给豆包或 MiniMax 朗读，再把声音放回对应的句子里。工作台会自动去掉首尾空白、统一音量，按停顿拼成一整条配音，并生成字幕时间轴。</p>
+  </header>
+
+  <section class="steps" aria-label="使用步骤">
+    <div class="step"><b>1 · 复制</b><p>点一句的「复制」，粘贴到豆包或 MiniMax，让它朗读或生成。</p></div>
+    <div class="step"><b>2 · 放回</b><p>导入生成的音频文件；或把一整段录音拖到下方，按停顿自动切句。</p></div>
+    <div class="step"><b>3 · 导出</b><p>试听整条，满意后导出配音 WAV 和字幕 SRT。</p></div>
+  </section>
+
+  <div class="settings" role="group" aria-label="停顿设置">
+    <label for="gapLine">句间停顿 <input id="gapLine" type="range" min="0.2" max="2" step="0.1" value="0.8"><output id="gapLineV" class="mono">0.8 s</output></label>
+    <label for="gapPara">段间停顿 <input id="gapPara" type="range" min="0.5" max="3.5" step="0.1" value="1.6"><output id="gapParaV" class="mono">1.6 s</output></label>
+    <label for="splitGap">自动切句：静音超过 <input id="splitGap" type="range" min="0.25" max="1.5" step="0.05" value="0.55"><output id="splitGapV" class="mono">0.55 s</output></label>
+  </div>
+
+  <details id="scriptBox">
+    <summary>修改配音稿（每行一句，空一行表示换段）</summary>
+    <textarea id="script" spellcheck="false"></textarea>
+    <div class="bar" style="margin-top:8px"><span class="hint grow">改字不会丢掉已放回的声音：只有文字完全相同的句子会保留原声音。</span><button id="applyScript" type="button">应用修改</button></div>
+  </details>
+
+  <div class="drop" id="bulkDrop">把一整段录音或录屏拖到这里，按停顿自动切成句子，从第一句未配音的句子开始依次放入。
+    <label class="btn" style="margin-left:6px">选择文件<input id="bulkFile" type="file" accept="audio/*,video/*"></label>
+  </div>
+
+  <div class="progress"><span id="progText" class="mono">0 / 0 句已配音</span><span class="meter"><i id="progBar"></i></span><span id="totalDur" class="mono hint"></span></div>
+
+  <div class="lines" id="lines"></div>
+  <p class="hint" id="recHint"></p>
+</div>
+
+<div class="dock"><div class="in">
+  <button id="playAll" class="primary" type="button">▶ 试听整条</button>
+  <button id="stopAll" type="button" disabled>■ 停止</button>
+  <span id="playPos" class="mono hint grow"></span>
+  <button id="exportBtn" type="button">导出配音和字幕</button>
+</div></div>
+<div class="toast" id="toast" hidden></div>
+
+<script>
+const DEFAULT_SCRIPT=`过去二十年，互联网完成了数字世界的索引。搜索、推荐和大模型，已经把互联网上的信息组织到了极致。
+可是，大模型知道泰山在哪里，却不知道，现在有没有云海。
+地图知道停车场的位置，却不知道，现在有没有空位，三十分钟后会不会满。
+物理世界的现在，仍未被 AI 索引。
+
+SeeTime 时印，正在构建物理世界大模型 SeeMind，让物理世界可搜索、可预测、可行动。
+要索引现实，先要看见现实。SeeMind 的感知，从天上、地上，一直延伸到网上。
+三十二颗遥感和雷达卫星，让地球上任意一个地点，都能取到最新的清晰影像。
+六十万个实时感知点，分布在一百九十六个国家和地区。
+四百七十七个信源，每天汇入两万到四万件正在发生的事。
+
+所有画面和消息，都落进同一个坐标：二百七十五座城市的三维底座。
+感官各自分工，大脑统一预测：专家模型在数据源头就地看懂，基础大模型融合推演。一座城市的实时推理，成本因此进入商业可行的区间。
+大模型建模的是文字；SeeMind 建模的，是物理世界的状态。
+它的每一个词，是带着时空坐标的现实切片；它的记忆，是一座城市持续演化的状态图。
+
+有了状态，就能向前推演：五分钟、三十分钟、一小时以后，每一条预测，都附带它的把握。
+而检验它的，是现实本身。
+每一条预测到期，现实都会给它打分，不需要人工标注，模型也无法修改。
+接入越多，验证越多，它就越准。这是互联网大模型不具备的训练条件。
+
+行动改变现实，现实训练模型。
+这套系统，已经在多座城市运行。
+在北京东城区，不增加人力编制，事件发现从人工局部巡查，升级为七乘二十四小时的 AI 感知。
+
+在南京，人们已经可以直接问它：钟山景区，现在人多吗？
+接入现实，不是 AGI 完成之后的部署阶段，而是 AGI 形成过程中的训练阶段。
+让世界训练智能。
+SeeTime 时印。洞察当下，预见未来。`;
+
+const $=s=>document.querySelector(s);
+const SR=48000;
+let actx=null;
+function ctx(){ if(!actx){ try{actx=new (window.AudioContext||window.webkitAudioContext)({sampleRate:SR})}catch(e){actx=new (window.AudioContext||window.webkitAudioContext)()} } return actx }
+let lines=[]; // {key,text,para}
+const clips=new Map(); // key -> {data:Float32Array, rate, src}
+let scriptText=DEFAULT_SCRIPT;
+
+/* ---------- storage (per-browser convenience) ---------- */
+try{const s=localStorage.getItem('vs_script'); if(s) scriptText=s}catch(e){}
+const IDB={db:null,
+  async open(){ if(this.db) return this.db; return this.db=await new Promise((res,rej)=>{ const r=indexedDB.open('voice-studio',1); r.onupgradeneeded=()=>r.result.createObjectStore('clips'); r.onsuccess=()=>res(r.result); r.onerror=()=>rej(r.error) }) },
+  async put(k,v){ try{const d=await this.open(); d.transaction('clips','readwrite').objectStore('clips').put(v,k)}catch(e){} },
+  async del(k){ try{const d=await this.open(); d.transaction('clips','readwrite').objectStore('clips').delete(k)}catch(e){} },
+  async all(){ try{const d=await this.open(); return await new Promise(res=>{const out=[];const c=d.transaction('clips').objectStore('clips').openCursor();c.onsuccess=()=>{const cur=c.result;if(cur){out.push([cur.key,cur.value]);cur.continue()}else res(out)};c.onerror=()=>res(out)})}catch(e){return []} }};
+
+/* ---------- script parsing ---------- */
+function parse(t){ const out=[]; let para=true; for(const raw of t.split(/\r?\n/)){ const s=raw.trim(); if(!s){para=true;continue} out.push({key:s,text:s,para}); para=false } return out }
+
+/* ---------- audio processing ---------- */
+function mono(ab){ const n=ab.length,c=ab.numberOfChannels,o=new Float32Array(n); for(let ch=0;ch<c;ch++){const d=ab.getChannelData(ch);for(let i=0;i<n;i++)o[i]+=d[i]/c} return o }
+function frames(x,rate){ const F=Math.round(rate*0.01),n=Math.floor(x.length/F),db=new Float32Array(n); for(let f=0;f<n;f++){let s=0;for(let i=f*F;i<(f+1)*F;i++)s+=x[i]*x[i]; db[f]=10*Math.log10(s/F+1e-12)} return {db,F} }
+function threshold(db){ const a=Array.from(db).sort((p,q)=>p-q); const floor=a[Math.floor(a.length*0.1)]||-90; const peak=a[Math.floor(a.length*0.98)]||-20; return Math.max(floor+12, Math.min(-45, peak-30)) }
+function polish(x,rate){ // trim silence, normalise loudness
+  const {db,F}=frames(x,rate); if(!db.length) return x;
+  const th=threshold(db); let a=0,b=db.length-1; while(a<db.length&&db[a]<th)a++; while(b>a&&db[b]<th)b--;
+  if(a>=b) return null;
+  const s=Math.max(0,a*F-Math.round(rate*0.08)), e=Math.min(x.length,(b+1)*F+Math.round(rate*0.15));
+  const y=x.slice(s,e); let ss=0,cnt=0,pk=0;
+  for(let f=a;f<=b;f++){ if(db[f]>=th){ for(let i=f*F;i<(f+1)*F;i++){ss+=x[i]*x[i];cnt++} } }
+  for(let i=0;i<y.length;i++) pk=Math.max(pk,Math.abs(y[i]));
+  let g=0.1/Math.sqrt(ss/Math.max(1,cnt)+1e-12); if(pk*g>0.89) g=0.89/pk;
+  const fi=Math.round(rate*0.01); for(let i=0;i<y.length;i++){ let k=g; if(i<fi)k*=i/fi; if(i>y.length-fi)k*=(y.length-i)/fi; y[i]*=k }
+  return y }
+function splitBySilence(x,rate,minGap){
+  const {db,F}=frames(x,rate); const th=threshold(db); const need=Math.round(minGap/0.01); const segs=[]; let start=-1,quiet=0;
+  for(let f=0;f<db.length;f++){ const on=db[f]>=th; if(on){ if(start<0)start=f; quiet=0 } else if(start>=0){ quiet++; if(quiet>=need){ segs.push([start,f-quiet]); start=-1; quiet=0 } } }
+  if(start>=0) segs.push([start,db.length-1-quiet]);
+  return segs.filter(([a,b])=>(b-a)*0.01>=0.3).map(([a,b])=>x.slice(Math.max(0,a*F-Math.round(rate*0.1)),Math.min(x.length,(b+1)*F+Math.round(rate*0.2)))) }
+async function decodeFile(file){ const ab=await file.arrayBuffer(); const buf=await ctx().decodeAudioData(ab); return {data:mono(buf),rate:buf.sampleRate} }
+
+/* ---------- rendering ---------- */
+function fmt(t){ const m=Math.floor(t/60),s=(t%60); return m+':'+s.toFixed(1).padStart(4,'0') }
+function render(){
+  const box=$('#lines'); box.innerHTML='';
+  lines.forEach((ln,i)=>{
+    const c=clips.get(ln.key);
+    const row=document.createElement('div'); row.className='row'+(ln.para&&i>0?' para':''); row.dataset.i=i;
+    row.innerHTML=`<div class="num">${String(i+1).padStart(2,'0')}</div>
+      <div class="txt"><p></p><div class="meta">${c?`<span class="chip ok">已配音 · <span class="mono">${(c.data.length/c.rate).toFixed(1)} s</span></span><canvas class="wave" width="360" height="56" aria-hidden="true"></canvas><span class="src"></span>`:`<span class="chip">待配音</span>`}</div></div>
+      <div class="acts">
+        <button type="button" data-a="copy">复制</button>
+        <label class="btn">导入<input type="file" accept="audio/*,video/*" data-a="file"></label>
+        ${canRecord?`<button type="button" class="rec" data-a="rec">● 录制</button>`:''}
+        <button type="button" data-a="play" ${c?'':'disabled'}>▶</button>
+        <button type="button" data-a="del" ${c?'':'disabled'} aria-label="删除这句的声音">删除</button>
+      </div>`;
+    row.querySelector('.txt p').textContent=ln.text;
+    if(c){ row.querySelector('.src').textContent=c.src||''; drawWave(row.querySelector('canvas'),c.data) }
+    box.appendChild(row);
+  });
+  progress();
+}
+function drawWave(cv,d){ const g=cv.getContext('2d'),W=cv.width,H=cv.height; g.clearRect(0,0,W,H); g.fillStyle=getComputedStyle(document.documentElement).getPropertyValue('--wave').trim()||'#0f6e78';
+  const step=d.length/W; for(let x=0;x<W;x++){ let m=0; const a=Math.floor(x*step),b=Math.floor((x+1)*step); for(let i=a;i<b;i+=8)m=Math.max(m,Math.abs(d[i])); const h=Math.max(1,m*H*1.05); g.fillRect(x,(H-h)/2,1,h) } }
+function progress(){ const n=lines.filter(l=>clips.has(l.key)).length; $('#progText').textContent=`${n} / ${lines.length} 句已配音`; $('#progBar').style.width=(lines.length?n/lines.length*100:0)+'%';
+  const r=assemble(true); $('#totalDur').textContent=r.dur?('合成后约 '+fmt(r.dur)):'' }
+
+/* ---------- actions ---------- */
+let toastT; function toast(m){ const t=$('#toast'); t.textContent=m; t.hidden=false; clearTimeout(toastT); toastT=setTimeout(()=>t.hidden=true,3600) }
+async function setClip(i,data,rate,src){ const y=polish(data,rate); if(!y){toast(`第 ${i+1} 句没有检测到声音，请检查文件或录音`);return false}
+  const c={data:y,rate,src}; clips.set(lines[i].key,c); IDB.put(lines[i].key,{data:y,rate,src}); return true }
+async function importFile(i,file){ try{ const {data,rate}=await decodeFile(file); if(await setClip(i,data,rate,file.name)){render();toast(`已放入第 ${i+1} 句`)} }
+  catch(e){ toast('读不出这个文件里的声音。请换成 mp3、m4a 或 wav 再试') } }
+async function importBulk(file){
+  try{ const {data,rate}=await decodeFile(file); const segs=splitBySilence(data,rate,+$('#splitGap').value);
+    let start=lines.findIndex(l=>!clips.has(l.key)); if(start<0) start=0;
+    let k=0; for(let i=start;i<lines.length&&k<segs.length;i++,k++){ await setClip(i,segs[k],rate,`${file.name} · 第 ${k+1} 段`) }
+    render(); const left=lines.length-start;
+    toast(segs.length===left?`切出 ${segs.length} 段，正好对应第 ${start+1}–${lines.length} 句`:`切出 ${segs.length} 段，从第 ${start+1} 句起有 ${left} 句。已按顺序放入，请逐句试听核对；不对齐时调整「静音超过」再导入一次`);
+  }catch(e){ toast('读不出这个文件里的声音。请换成 mp3、m4a、wav 或 mp4 再试') } }
+
+$('#lines').addEventListener('click',async e=>{ const b=e.target.closest('button'); if(!b) return; const i=+b.closest('.row').dataset.i; const ln=lines[i];
+  if(b.dataset.a==='copy'){ try{await navigator.clipboard.writeText(ln.text);toast(`已复制第 ${i+1} 句`)}catch(err){ const r=document.createRange(); r.selectNodeContents(b.closest('.row').querySelector('.txt p')); const s=getSelection(); s.removeAllRanges(); s.addRange(r); toast('已选中文字，按 ⌘C 复制') } }
+  if(b.dataset.a==='play') playClip(i);
+  if(b.dataset.a==='del'){ clips.delete(ln.key); IDB.del(ln.key); render() }
+  if(b.dataset.a==='rec') toggleRec(i,b);
+});
+$('#lines').addEventListener('change',e=>{ const inp=e.target; if(inp.dataset.a==='file'&&inp.files[0]) importFile(+inp.closest('.row').dataset.i,inp.files[0]) });
+$('#lines').addEventListener('dragover',e=>{ const r=e.target.closest('.row'); if(!r) return; e.preventDefault(); document.querySelectorAll('.row.drag').forEach(x=>x!==r&&x.classList.remove('drag')); r.classList.add('drag') });
+$('#lines').addEventListener('dragleave',e=>{ const r=e.target.closest('.row'); if(r&&!r.contains(e.relatedTarget)) r.classList.remove('drag') });
+$('#lines').addEventListener('drop',e=>{ const r=e.target.closest('.row'); if(!r) return; e.preventDefault(); r.classList.remove('drag'); const f=e.dataTransfer.files[0]; if(f) importFile(+r.dataset.i,f) });
+const bd=$('#bulkDrop');
+bd.addEventListener('dragover',e=>{e.preventDefault();bd.classList.add('drag')}); bd.addEventListener('dragleave',()=>bd.classList.remove('drag'));
+bd.addEventListener('drop',e=>{e.preventDefault();bd.classList.remove('drag');const f=e.dataTransfer.files[0];if(f)importBulk(f)});
+$('#bulkFile').addEventListener('change',e=>{ if(e.target.files[0]) importBulk(e.target.files[0]); e.target.value='' });
+
+for(const id of ['gapLine','gapPara','splitGap']){ const el=$('#'+id); const o=$('#'+id+'V'); const f=()=>{o.textContent=(+el.value).toFixed(id==='splitGap'?2:1)+' s'; if(id!=='splitGap') progress()}; el.addEventListener('input',f); f() }
+
+$('#script').value=scriptText;
+$('#applyScript').addEventListener('click',()=>{ scriptText=$('#script').value; try{localStorage.setItem('vs_script',scriptText)}catch(e){} lines=parse(scriptText); render(); toast(`配音稿已更新，共 ${lines.length} 句`) });
+
+/* ---------- playback ---------- */
+let srcNode=null,playT0=0,cues=[],raf=0;
+function stopPlay(){ if(srcNode){try{srcNode.stop()}catch(e){} srcNode=null} cancelAnimationFrame(raf); $('#stopAll').disabled=true; $('#playPos').textContent=''; document.querySelectorAll('.row.playing').forEach(r=>r.classList.remove('playing')) }
+function playBuf(data,rate,onTick){ stopPlay(); const c=ctx(); c.resume(); const b=c.createBuffer(1,data.length,rate); b.copyToChannel(data,0); srcNode=c.createBufferSource(); srcNode.buffer=b; srcNode.connect(c.destination); srcNode.onended=()=>stopPlay(); playT0=c.currentTime; srcNode.start(); $('#stopAll').disabled=false;
+  const tick=()=>{ const t=c.currentTime-playT0; onTick&&onTick(t); raf=requestAnimationFrame(tick) }; tick() }
+function playClip(i){ const c=clips.get(lines[i].key); if(c) playBuf(c.data,c.rate,()=>{}) }
+$('#stopAll').addEventListener('click',stopPlay);
+$('#playAll').addEventListener('click',()=>{ const r=assemble(); if(!r.dur){toast('还没有放入任何声音');return}
+  let last=-1; playBuf(r.data,SR,t=>{ $('#playPos').textContent=fmt(t)+' / '+fmt(r.dur); const cur=r.cues.find(q=>t>=q.start&&t<q.end+0.4); const idx=cur?cur.i:-1; if(idx!==last){ document.querySelectorAll('.row.playing').forEach(x=>x.classList.remove('playing')); if(idx>=0){const row=document.querySelector(`.row[data-i="${idx}"]`); row&&row.classList.add('playing')} last=idx } }) });
+
+/* ---------- assembly ---------- */
+function resample(d,from){ if(from===SR) return d; const n=Math.round(d.length*SR/from),o=new Float32Array(n),r=from/SR; for(let i=0;i<n;i++){const p=i*r,a=Math.floor(p),f=p-a;o[i]=(d[a]||0)*(1-f)+(d[a+1]||0)*f} return o }
+function assemble(dry){ const gl=+$('#gapLine').value,gp=+$('#gapPara').value,lead=0.6; let t=lead; const parts=[],cs=[]; let prev=false;
+  lines.forEach((ln,i)=>{ const c=clips.get(ln.key); if(!c) return; if(prev) t+=ln.para?gp:gl; const len=c.data.length/c.rate; parts.push([Math.round(t*SR),c]); cs.push({i,text:ln.text,start:t,end:t+len}); t+=len; prev=true });
+  if(!parts.length) return {dur:0,cues:[]}; const dur=t+1.2; if(dry) return {dur,cues:cs};
+  const out=new Float32Array(Math.round(dur*SR)); for(const [off,c] of parts){ const d=resample(c.data,c.rate); out.set(d.subarray(0,Math.min(d.length,out.length-off)),off) }
+  return {data:out,dur,cues:cs} }
+function wav(d){ const n=d.length,b=new ArrayBuffer(44+n*2),v=new DataView(b); const w=(o,s)=>{for(let i=0;i<s.length;i++)v.setUint8(o+i,s.charCodeAt(i))};
+  w(0,'RIFF');v.setUint32(4,36+n*2,true);w(8,'WAVE');w(12,'fmt ');v.setUint32(16,16,true);v.setUint16(20,1,true);v.setUint16(22,1,true);v.setUint32(24,SR,true);v.setUint32(28,SR*2,true);v.setUint16(32,2,true);v.setUint16(34,16,true);w(36,'data');v.setUint32(40,n*2,true);
+  for(let i=0;i<n;i++){const s=Math.max(-1,Math.min(1,d[i]));v.setInt16(44+i*2,s<0?s*32768:s*32767,true)} return new Uint8Array(b) }
+function srtTime(t){ const ms=Math.round(t*1000),h=Math.floor(ms/3600000),m=Math.floor(ms/60000)%60,s=Math.floor(ms/1000)%60; return `${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')},${String(ms%1000).padStart(3,'0')}` }
+function srt(cs){ return cs.map((q,k)=>`${k+1}\n${srtTime(q.start)} --> ${srtTime(q.end)}\n${q.text}\n`).join('\n') }
+const enc=new TextEncoder();
+const CRC=(()=>{const t=new Uint32Array(256);for(let n=0;n<256;n++){let c=n;for(let k=0;k<8;k++)c=c&1?0xEDB88320^(c>>>1):c>>>1;t[n]=c>>>0}return t})();
+function crc32(u){let c=0xFFFFFFFF;for(let i=0;i<u.length;i++)c=CRC[(c^u[i])&255]^(c>>>8);return (c^0xFFFFFFFF)>>>0}
+function zip(files){ const parts=[],central=[]; let off=0;
+  for(const [name,data] of files){ const nm=enc.encode(name),crc=crc32(data),h=new DataView(new ArrayBuffer(30));
+    h.setUint32(0,0x04034b50,true);h.setUint16(4,20,true);h.setUint16(6,0x0800,true);h.setUint16(8,0,true);h.setUint32(14,crc,true);h.setUint32(18,data.length,true);h.setUint32(22,data.length,true);h.setUint16(26,nm.length,true);
+    parts.push(new Uint8Array(h.buffer),nm,data);
+    const c=new DataView(new ArrayBuffer(46)); c.setUint32(0,0x02014b50,true);c.setUint16(4,20,true);c.setUint16(6,20,true);c.setUint16(8,0x0800,true);c.setUint32(16,crc,true);c.setUint32(20,data.length,true);c.setUint32(24,data.length,true);c.setUint16(28,nm.length,true);c.setUint32(42,off,true);
+    central.push(new Uint8Array(c.buffer),nm); off+=30+nm.length+data.length }
+  const cs=central.reduce((a,u)=>a+u.length,0),e=new DataView(new ArrayBuffer(22)); e.setUint32(0,0x06054b50,true);e.setUint16(8,files.length,true);e.setUint16(10,files.length,true);e.setUint32(12,cs,true);e.setUint32(16,off,true);
+  return new Blob([...parts,...central,new Uint8Array(e.buffer)],{type:'application/zip'}) }
+
+let downloads=null;
+$('#exportBtn').addEventListener('click',async()=>{ const r=assemble(); if(!r.dur){toast('还没有放入任何声音');return}
+  const missing=lines.length-r.cues.length; const W=wav(r.data), S=enc.encode(srt(r.cues)), J=enc.encode(JSON.stringify({sampleRate:SR,duration:+r.dur.toFixed(3),cues:r.cues.map(q=>({line:q.i+1,start:+q.start.toFixed(3),end:+q.end.toFixed(3),text:q.text}))},null,1));
+  const base='配音_'+new Date().toISOString().slice(0,10);
+  if(downloads){ try{ await downloads.save({filename:base+'.zip',data:zip([[base+'.wav',W],[base+'.srt',S],[base+'_时间轴.json',J]])}); toast(missing?`已导出（还有 ${missing} 句没配音，已跳过）`:'已导出：配音 WAV、字幕 SRT、时间轴') }
+    catch(e){ if(e&&e.code!=='declined') toast('这里暂时无法保存文件，请把本页下载到电脑上打开') } return }
+  for(const [n,d,t] of [[base+'.wav',W,'audio/wav'],[base+'.srt',S,'text/plain']]){ const a=document.createElement('a'); a.href=URL.createObjectURL(new Blob([d],{type:t})); a.download=n; document.body.appendChild(a); a.click(); a.remove() }
+  toast(missing?`已导出（还有 ${missing} 句没配音，已跳过）`:'已导出配音 WAV 和字幕 SRT') });
+
+/* ---------- tab-audio recording (works when this page is opened as a local file in Chrome) ---------- */
+const canRecord=!window.claude && !!(navigator.mediaDevices&&navigator.mediaDevices.getDisplayMedia) && typeof MediaRecorder!=='undefined';
+let share=null,rec=null,recIdx=-1,chunks=[];
+async function toggleRec(i,btn){
+  if(rec&&rec.state==='recording'){ const was=recIdx; rec.stop(); return }
+  try{ if(!share||!share.getAudioTracks().some(t=>t.readyState==='live')){
+      share=await navigator.mediaDevices.getDisplayMedia({video:true,audio:{echoCancellation:false,noiseSuppression:false,autoGainControl:false},systemAudio:'include',selfBrowserSurface:'exclude'});
+      share.getVideoTracks().forEach(t=>t.enabled=false) }
+    const at=share.getAudioTracks(); if(!at.length){ toast('没有收到声音：共享时请选「Chrome 标签页」，并打开「同时共享标签页音频」'); share.getTracks().forEach(t=>t.stop()); share=null; return }
+    chunks=[]; recIdx=i; rec=new MediaRecorder(new MediaStream(at)); rec.ondataavailable=e=>e.data.size&&chunks.push(e.data);
+    rec.onstop=async()=>{ document.querySelectorAll('button.rec.on').forEach(b=>{b.classList.remove('on');b.textContent='● 录制'}); const blob=new Blob(chunks,{type:rec.mimeType});
+      try{ const buf=await ctx().decodeAudioData(await blob.arrayBuffer()); if(await setClip(recIdx,mono(buf),buf.sampleRate,'标签页录音')){render();toast(`第 ${recIdx+1} 句已录好`)} }catch(e){toast('录音解码失败，请再录一次')} };
+    rec.start(); btn.classList.add('on'); btn.textContent='■ 停止';
+    toast(`正在录第 ${i+1} 句：切到豆包标签页让它朗读，读完回来点「停止」`);
+  }catch(e){ toast('没有开始录制：需要在共享窗口里选择豆包所在的标签页') } }
+$('#recHint').textContent=canRecord?'录制：第一次点「录制」时，在共享窗口里选择豆包所在的 Chrome 标签页，并打开「同时共享标签页音频」。之后每句只需点录制和停止。':'在 Claude 里打开时只能导入音频文件。如需直接录制豆包朗读的声音，把这个页面保存到电脑，用 Chrome 打开，每句旁会出现「录制」按钮。';
+
+/* ---------- boot ---------- */
+lines=parse(scriptText);
+(async()=>{ for(const [k,v] of await IDB.all()){ if(v&&v.data) clips.set(k,v) } render() })();
+render();
+if(window.claude&&window.claude.use){ window.claude.use('downloads').then(d=>{downloads=d}).catch(()=>{}) }
+</script>
+
+</body></html>

@@ -1,0 +1,135 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>SeeTime 内容进展看板</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;500;700&family=Noto+Serif+SC:wght@600;700&family=JetBrains+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: 顶部总进度条 + 分组卡片网格；每张卡片是一个派生物，内含步骤清单 */
+:root{
+  --bg:#F2F4F1; --surface:#FFFFFF; --surface-2:#F7F8F5; --ink:#18211F; --muted:#5C6865; --line:#D8DDD7;
+  --accent:#1F5C8C; --accent-soft:#E2ECF4; --amber:#B4650F; --amber-soft:#F6EAD9;
+  --good:#2E7D4F; --good-soft:#E1F0E6; --warn:#A8710C; --warn-soft:#F7EDD6; --bad:#B03A2E; --bad-soft:#F6E1DE;
+  --font-display:"Noto Serif SC","Songti SC",serif;
+  --font-body:"Noto Sans SC","PingFang SC","Microsoft YaHei",system-ui,sans-serif;
+  --font-mono:"JetBrains Mono",ui-monospace,Menlo,monospace;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#111715; --surface:#18201E; --surface-2:#1D2624; --ink:#E6ECE9; --muted:#97A39F; --line:#2D3835;
+  --accent:#7DB4E0; --accent-soft:#1C2E3B; --amber:#E2A05A; --amber-soft:#35281A;
+  --good:#7CC79A; --good-soft:#1B3125; --warn:#E3B55A; --warn-soft:#352B17; --bad:#E58A80; --bad-soft:#3A201D; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#111715; --surface:#18201E; --surface-2:#1D2624; --ink:#E6ECE9; --muted:#97A39F; --line:#2D3835;
+  --accent:#7DB4E0; --accent-soft:#1C2E3B; --amber:#E2A05A; --amber-soft:#35281A;
+  --good:#7CC79A; --good-soft:#1B3125; --warn:#E3B55A; --warn-soft:#352B17; --bad:#E58A80; --bad-soft:#3A201D; color-scheme:dark}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font-family:var(--font-body);font-size:15px;line-height:1.6}
+.wrap{max-width:1180px;margin:0 auto;padding-block:32px 64px;padding-inline:clamp(16px,4vw,40px);display:grid;gap:28px}
+h1,h2,h3{font-family:var(--font-display);margin:0;line-height:1.3;text-wrap:balance}
+h1{font-size:1.8rem} h2{font-size:1.2rem} h3{font-size:1.05rem}
+.eyebrow{font-family:var(--font-mono);font-size:.74rem;letter-spacing:.08em;color:var(--amber);text-transform:uppercase}
+.muted{color:var(--muted)}
+.head{display:grid;gap:6px}
+.summary{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,170px),1fr));gap:12px}
+.tile{background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:14px 16px;display:grid;gap:2px}
+.tile .v{font-family:var(--font-mono);font-size:1.7rem;font-weight:500;font-variant-numeric:tabular-nums;line-height:1.2}
+.tile .l{font-size:.82rem;color:var(--muted)}
+.overall{display:grid;gap:6px}
+.track{height:10px;border-radius:5px;background:var(--surface-2);border:1px solid var(--line);overflow:hidden}
+.track i{display:block;height:100%;background:var(--accent);transition:width .3s}
+.group{display:grid;gap:12px}
+.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,340px),1fr));gap:14px}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:16px;display:grid;gap:10px;align-content:start;min-width:0}
+.card.blocked{border-color:var(--warn)}
+.top{display:flex;justify-content:space-between;gap:10px;align-items:start}
+.code{font-family:var(--font-mono);font-size:.75rem;color:var(--muted)}
+.chip{display:inline-flex;font-size:.74rem;padding:1px 9px;border-radius:99px;white-space:nowrap;border:1px solid var(--line);color:var(--muted);background:var(--surface-2)}
+.s-未开始{} .s-进行中{background:var(--accent-soft);color:var(--accent);border-color:transparent}
+.s-待确认{background:var(--warn-soft);color:var(--warn);border-color:transparent}
+.s-已完成{background:var(--good-soft);color:var(--good);border-color:transparent}
+.s-已暂停{background:var(--bad-soft);color:var(--bad);border-color:transparent}
+.meta{display:grid;grid-template-columns:auto 1fr;gap:2px 10px;font-size:.84rem}
+.meta span:nth-child(odd){color:var(--muted)}
+.prog{display:grid;grid-template-columns:1fr auto;gap:10px;align-items:center;font-size:.8rem}
+.prog .track{height:6px}
+ul.steps{list-style:none;margin:0;padding:0;display:grid;gap:4px}
+ul.steps label{display:flex;gap:8px;align-items:flex-start;font-size:.88rem;cursor:pointer}
+ul.steps input{margin-top:4px;accent-color:var(--accent)}
+ul.steps .done{color:var(--muted);text-decoration:line-through}
+.note{font-size:.85rem;color:var(--muted);border-left:2px solid var(--line);padding-left:10px}
+.need{font-size:.85rem;background:var(--warn-soft);border-radius:6px;padding:8px 10px}
+.foot{display:flex;flex-wrap:wrap;gap:8px;align-items:center;justify-content:space-between}
+a.link{font-size:.86rem;color:var(--accent);text-decoration:none;border:1px solid var(--accent);border-radius:6px;padding:4px 10px}
+a.link:hover{background:var(--accent-soft)}
+select{font:inherit;font-size:.84rem;color:var(--ink);background:var(--surface);border:1px solid var(--line);border-radius:6px;padding:3px 6px}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.banner{border:1px dashed var(--warn);background:var(--warn-soft);padding:10px 14px;border-radius:8px;font-size:.9rem}
+.empty{border:1px dashed var(--line);border-radius:8px;padding:20px;text-align:center;color:var(--muted)}
+.upd{font-family:var(--font-mono);font-size:.74rem;color:var(--muted)}
+</style>
+
+<div class="wrap">
+  <div class="head">
+    <span class="eyebrow">派生自 BP 母本 V2026-10</span>
+    <h1>内容进展看板</h1>
+    <p class="muted">视频、手册、方案等派生物的制作进度。勾选步骤或修改状态会自动保存；Claude 完成一步也会在这里更新。</p>
+  </div>
+  <div id="banner"></div>
+  <div class="summary" id="summary"></div>
+  <div class="overall"><div class="prog" style="font-size:.86rem"><span>总体进度</span><span class="upd" id="pct"></span></div><div class="track"><i id="bar" style="width:0"></i></div></div>
+  <div id="groups"><div class="empty">正在读取进展…</div></div>
+</div>
+
+<script>
+(function(){
+const $=s=>document.querySelector(s);
+const esc=s=>String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const STATUSES=["未开始","进行中","待确认","已完成","已暂停"];
+let items=[],db=null,canWrite=true;
+function pct(it){const s=it.steps||[];if(!s.length)return it.status==="已完成"?100:0;return Math.round(s.filter(x=>x.done).length/s.length*100)}
+function render(){
+  if(!items.length){$("#groups").innerHTML='<div class="empty">还没有事项。</div>';return}
+  const total=items.reduce((a,b)=>a+(b.steps||[]).length,0),done=items.reduce((a,b)=>a+(b.steps||[]).filter(x=>x.done).length,0);
+  const p=total?Math.round(done/total*100):0;$("#bar").style.width=p+"%";$("#pct").textContent=`${done} / ${total} 步 · ${p}%`;
+  const cnt=s=>items.filter(i=>i.status===s).length;
+  $("#summary").innerHTML=`
+    <div class="tile"><span class="v">${items.length}</span><span class="l">事项总数</span></div>
+    <div class="tile"><span class="v">${cnt("进行中")}</span><span class="l">进行中</span></div>
+    <div class="tile"><span class="v">${cnt("待确认")}</span><span class="l">等你确认</span></div>
+    <div class="tile"><span class="v">${cnt("已完成")}</span><span class="l">已完成</span></div>`;
+  const groups=[...new Set(items.map(i=>i.group))];
+  $("#groups").innerHTML=groups.map(g=>`<section class="group"><h2>${esc(g)}</h2><div class="cards">${items.filter(i=>i.group===g).map(card).join("")}</div></section>`).join("");
+}
+function card(it){
+  const p=pct(it);
+  return `<article class="card ${it.status==="待确认"?"blocked":""}" data-id="${esc(it.id)}">
+    <div class="top"><div style="display:grid;gap:2px"><span class="code">${esc(it.code)}</span><h3>${esc(it.name)}</h3></div><span class="chip s-${esc(it.status)}">${esc(it.status)}</span></div>
+    <div class="meta"><span>读者</span><span>${esc(it.audience||"—")}</span><span>形式</span><span>${esc(it.format||"—")}</span><span>负责</span><span>${esc(it.owner||"—")}</span></div>
+    <div class="prog"><div class="track"><i style="width:${p}%;${p===100?"background:var(--good)":""}"></i></div><span class="upd">${p}%</span></div>
+    ${(it.steps||[]).length?`<ul class="steps">${it.steps.map((s,k)=>`<li><label><input type="checkbox" data-k="${k}" ${s.done?"checked":""} ${canWrite?"":"disabled"}><span class="${s.done?"done":""}">${esc(s.t)}</span></label></li>`).join("")}</ul>`:""}
+    ${it.need?`<div class="need"><b>需要你：</b>${esc(it.need)}</div>`:""}
+    ${it.note?`<div class="note">${esc(it.note)}</div>`:""}
+    <div class="foot">
+      <select data-status aria-label="状态" ${canWrite?"":"disabled"}>${STATUSES.map(s=>`<option${s===it.status?" selected":""}>${s}</option>`).join("")}</select>
+      ${it.link?`<a class="link" href="${esc(it.link)}" target="_blank" rel="noopener">打开成果</a>`:""}
+      ${it.updated?`<span class="upd">更新 ${esc(it.updated)}</span>`:""}
+    </div></article>`;
+}
+async function write(it){
+  if(!db)return;const {id,...data}=it;data.updated=new Date().toISOString().slice(0,10);it.updated=data.updated;
+  try{await db.doc("items/"+id).set(data)}catch(e){if(e.code==="invalid_argument"){canWrite=false;render()}}
+}
+document.addEventListener("change",e=>{
+  const c=e.target.closest(".card");if(!c)return;const it=items.find(x=>x.id===c.dataset.id);if(!it)return;
+  if(e.target.matches("input[type=checkbox]")){it.steps[+e.target.dataset.k].done=e.target.checked;
+    if(it.steps.every(s=>s.done)&&it.status!=="已完成")it.status="已完成";else if(it.status==="未开始"&&it.steps.some(s=>s.done))it.status="进行中";}
+  if(e.target.matches("[data-status]"))it.status=e.target.value;
+  render();write(it);
+});
+(async()=>{
+  try{db=window.claude?.use?await window.claude.use("db"):null}catch(e){db=null}
+  if(!db){$("#banner").innerHTML='<div class="banner">暂时无法读取进展数据。请登录 claude.ai 后打开本页。</div>';$("#groups").innerHTML="";return}
+  db.collection("items").orderBy("order").onSnapshot(snap=>{items=snap.docs.map(d=>({id:d.id,...JSON.parse(JSON.stringify(d.data()))}));render()},
+    ()=>{$("#banner").innerHTML='<div class="banner">进展数据连接中断，刷新页面后重试。</div>'});
+})();
+})();
+</script>
+
+</body></html>

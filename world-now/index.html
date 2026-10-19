@@ -1,0 +1,214 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>世界此刻</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@600;900&family=Noto+Sans+SC:wght@400;500;700&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: an observatory bulletin — one narrow reading column, a timestamp rail, data set in mono like instrument readouts */
+:root{
+  --bg:#f3f5f7; --surface:#ffffff; --fg:#14202b; --muted:#5b6b78; --line:#d8dfe5;
+  --accent:#0b6e8a; --accent-soft:#e1eff3;
+  --sev-red:#c0392b; --sev-orange:#d9731a; --sev-green:#2e8b57;
+  --sev-red-bg:#fbe9e7; --sev-orange-bg:#fdf0e3; --sev-green-bg:#e6f4ec;
+  --display:"Noto Serif SC","Songti SC","SimSun",serif;
+  --body:"Noto Sans SC","PingFang SC","Microsoft YaHei",system-ui,sans-serif;
+  --mono:"IBM Plex Mono",ui-monospace,"SFMono-Regular",Menlo,monospace;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#0d151c; --surface:#131e27; --fg:#e4ebf0; --muted:#93a4b1; --line:#24333f;
+  --accent:#4fb3d0; --accent-soft:#16303a;
+  --sev-red:#f07a6b; --sev-orange:#f2a35b; --sev-green:#6fcf97;
+  --sev-red-bg:#3a1d1a; --sev-orange-bg:#3a2a18; --sev-green-bg:#16301f;
+  color-scheme:dark;}}
+:root[data-theme="dark"]{
+  --bg:#0d151c; --surface:#131e27; --fg:#e4ebf0; --muted:#93a4b1; --line:#24333f;
+  --accent:#4fb3d0; --accent-soft:#16303a;
+  --sev-red:#f07a6b; --sev-orange:#f2a35b; --sev-green:#6fcf97;
+  --sev-red-bg:#3a1d1a; --sev-orange-bg:#3a2a18; --sev-green-bg:#16301f;
+  color-scheme:dark;}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--fg);font-family:var(--body);font-size:15px;line-height:1.7;padding-inline:16px;padding-block:28px 56px}
+.wrap{max-width:760px;margin:0 auto;display:flex;flex-direction:column;gap:36px}
+a{color:var(--accent);text-decoration-thickness:1px;text-underline-offset:3px}
+a:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.mono{font-family:var(--mono);font-variant-numeric:tabular-nums}
+header{display:flex;flex-direction:column;gap:10px;border-bottom:2px solid var(--fg);padding-bottom:18px}
+.stamp{display:flex;flex-wrap:wrap;gap:6px 16px;font-family:var(--mono);font-size:12px;color:var(--muted);letter-spacing:.04em}
+.stamp b{color:var(--fg);font-weight:500}
+h1{font-family:var(--display);font-weight:900;font-size:clamp(34px,8vw,52px);line-height:1.1;margin:0;letter-spacing:.02em}
+.lede{margin:0;color:var(--muted);max-width:62ch}
+h2{font-family:var(--display);font-weight:600;font-size:21px;margin:0 0 4px;text-wrap:balance}
+.eyebrow{font-family:var(--mono);font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--accent)}
+section{display:flex;flex-direction:column;gap:14px;min-width:0}
+.focus{display:grid;gap:12px}
+.item{background:var(--surface);border:1px solid var(--line);border-left:4px solid var(--sev);padding:14px 16px;display:flex;flex-direction:column;gap:6px;min-width:0}
+.item h3{margin:0;font-size:16px;font-weight:700;text-wrap:balance}
+.item p{margin:0;max-width:65ch}
+.meta{display:flex;flex-wrap:wrap;gap:6px 10px;align-items:center;font-size:12px;color:var(--muted)}
+.pill{display:inline-block;font-family:var(--mono);font-size:11px;padding:1px 8px;border-radius:999px;background:var(--pbg);color:var(--pc);font-weight:500}
+.red{--sev:var(--sev-red);--pbg:var(--sev-red-bg);--pc:var(--sev-red)}
+.orange{--sev:var(--sev-orange);--pbg:var(--sev-orange-bg);--pc:var(--sev-orange)}
+.green{--sev:var(--sev-green);--pbg:var(--sev-green-bg);--pc:var(--sev-green)}
+.info{--sev:var(--accent);--pbg:var(--accent-soft);--pc:var(--accent)}
+.readouts{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:1px;background:var(--line);border:1px solid var(--line)}
+.readout{background:var(--surface);padding:12px 14px;display:flex;flex-direction:column;gap:2px}
+.readout .v{font-family:var(--mono);font-size:24px;font-weight:500;line-height:1.2}
+.readout .k{font-size:12px;color:var(--muted)}
+.tablebox{overflow-x:auto;border:1px solid var(--line);background:var(--surface)}
+table{border-collapse:collapse;width:100%;font-size:13px;min-width:520px}
+th,td{text-align:left;padding:7px 12px;border-bottom:1px solid var(--line);vertical-align:top}
+th{font-weight:500;color:var(--muted);font-size:12px;background:var(--bg)}
+td.n{font-family:var(--mono);font-variant-numeric:tabular-nums;white-space:nowrap}
+tr.hl td{background:var(--sev-orange-bg)}
+details{background:var(--surface);border:1px solid var(--line)}
+summary{cursor:pointer;padding:10px 14px;font-size:14px;font-weight:500}
+summary:focus-visible{outline:2px solid var(--accent)}
+details .tablebox{border:0;border-top:1px solid var(--line)}
+ul.plain{margin:0;padding-left:1.2em;display:flex;flex-direction:column;gap:6px;max-width:65ch}
+.note{font-size:13px;color:var(--muted);max-width:65ch;margin:0}
+footer{border-top:1px solid var(--line);padding-top:16px;display:flex;flex-direction:column;gap:10px;font-size:13px;color:var(--muted)}
+footer ol{margin:0;padding-left:1.4em;display:flex;flex-direction:column;gap:2px;word-break:break-word}
+</style>
+
+<div class="wrap">
+<header>
+  <div class="stamp"><span>WORLD NOW · 每日简报</span><span>第 <b>007</b> 期</span><span>北京时间 <b>2026-10-19</b></span><span>数据截至 <b>UTC 10-18 23:59</b></span></div>
+  <h1>世界此刻</h1>
+  <p class="lede">用全球公开数据观察过去 24 小时的地球：地震、火山、野火与气旋，以及影响出行和产业的要事。本期由 AI 自动采集与撰写。</p>
+</header>
+
+<section aria-labelledby="s-focus">
+  <div class="eyebrow">今日焦点</div>
+  <h2 id="s-focus">三件值得关注的事</h2>
+  <div class="focus">
+    <article class="item red">
+      <div class="meta"><span class="pill">台风</span><span class="mono">10-17 → 10-19</span><span>关岛 → 菲律宾海</span></div>
+      <h3>超强台风“Champi”擦过关岛南部，全岛约一半断电，航班取消延续到 19 日</h3>
+      <p>“Champi”于关岛时间 18 日凌晨 4 时 26 分（UTC 17 日 18:26）从梅里索以南约 16 公里处掠过，强风眼墙落在关岛南部。美国国家气象局关岛办公室在其过境后将其升格为超强台风，持续风速约 241 公里/小时；联合台风警报中心事后分析的峰值约 269 公里/小时。电力方面，关岛电力局称供电比例从过境后不久的约 75% 降至当天上午的约 50%，未出现全岛停电，医院、军事基地和杜梦湾酒店区大部分保持供电，南部村落受灾最重。供水方面，乌古姆地表水处理厂因河水浑浊停运，部分社区水压低或停水。关岛纪念医院接诊 3 名与风暴有关的患者，伤情轻微均已出院；本期未见死亡报道。美国白宫已批准联邦紧急状态声明，公立学校 19 日停课检查校舍。航空方面，美联航取消了往返檀香山、东京成田、大阪关西等航线的部分航班，大韩航空、菲律宾航空及多家韩国廉航也有取消，影响延续到 19 日。台风已西移远离关岛，18 日 15:00 UTC 的警报将其从超强台风降回台风级，预报将在菲律宾海重新增强，23 日前后可能接近台湾岛以东海域，72 小时后的路径（东海方向或台湾南部方向）仍有较大分歧，值得两岸及东亚航运、航空持续关注。</p>
+    </article>
+    <article class="item orange">
+      <div class="meta"><span class="pill">飓风</span><span class="mono">10-17 → 10-20</span><span>墨西哥米却肯、科利马、哈利斯科沿海</span></div>
+      <h3>飓风“特鲁迪”沿墨西哥太平洋海岸平行北上，强降雨与山洪风险持续</h3>
+      <p>据路透社援引美国国家飓风中心 18 日的更新，“特鲁迪”位于曼萨尼约以西约 240 公里，最大持续风速约 165 公里/小时，以每小时约 17 公里向西北移动，路径与海岸线大致平行，截至发稿未见登陆报道。飓风中心预计其 18 日白天强度变化不大，当晚起将迅速减弱，19 至 20 日移至南下加利福尼亚州以南海域。米却肯、科利马、哈利斯科三州预计累计降雨 100–200 毫米、局地约 300 毫米，山区可能出现危及生命的洪水和泥石流，迎岸风一侧海岸还面临风暴潮和大浪威胁。本期截稿前未找到关于伤亡、停电或港口机场受损的可靠报道。</p>
+    </article>
+    <article class="item orange">
+      <div class="meta"><span class="pill">城市秩序</span><span class="mono">10-17 → 10-18</span><span>法国多地</span></div>
+      <h3>法国全国抗议演变为打砸抢，一天内近 2,400 人被捕</h3>
+      <p>由学生团体发起、针对教育经费不足和教师短缺的抗议，在“黄背心”加入后扩展到紧缩政策、生活成本和燃油价格等议题。据法国内政部数据，17 日（周六）全国近 2,400 人被捕，约 1,000 名警察和宪兵受伤，巴黎等地出现商店遭打砸抢的情况，是法国多年来最严重的城市骚乱之一。马克龙 18 日发表电视讲话，表示将追究暴力行为者责任并加强安保，同时设立危机小组为受损方提供紧急援助，但未宣布紧急状态或宵禁。目前尚无死亡报道，交通受影响的具体情况未见公布；事件已成为明年总统选举前的政治议题。</p>
+    </article>
+  </div>
+</section>
+
+<section aria-labelledby="s-quake">
+  <div class="eyebrow">地球系统 · 地震</div>
+  <h2 id="s-quake">过去 24 小时 4.5 级以上地震</h2>
+  <div class="readouts" role="list">
+    <div class="readout" role="listitem"><span class="v">10</span><span class="k">次（M4.5+）</span></div>
+    <div class="readout" role="listitem"><span class="v">5.2</span><span class="k">最大震级 · 共 3 次（汤加、印尼、巴新）</span></div>
+    <div class="readout" role="listitem"><span class="v">6</span><span class="k">次发生在西南太平洋</span></div>
+    <div class="readout" role="listitem"><span class="v">0</span><span class="k">次触发海啸标记</span></div>
+  </div>
+  <p class="note">分布：西南太平洋 6 次（巴布亚新几内亚 3 次、汤加 1 次、斐济地区 1 次、新西兰克马德克群岛 1 次），美洲 2 次（巴拿马、圣基茨和尼维斯各 1 次），东南亚 1 次（印度尼西亚弗洛勒斯岛），印度洋 1 次（卡尔斯伯格海岭）。本日最大震级为 5.2 级，共出现 3 次：08:00 印尼鲁滕北西北 55 公里（前一天同一区域也有 4.5 级地震）、19:32 汤加奥霍努阿东南偏东 71 公里、22:31 巴新科科波南东南 129 公里，震源深度均为 10 公里。巴新新不列颠岛科科波以南海域在 22:06 和 22:31 相隔 25 分钟连发 4.7 级和 5.1 级（表中高亮）。斐济地区 22:34 的 4.5 级地震震源深达约 552 公里。本日所有地震均无灾损评估，也无海啸标记。</p>
+  <details>
+    <summary>查看全部 10 次地震（UTC 时间，10 月 18 日）</summary>
+    <div class="tablebox">
+    <table>
+      <thead><tr><th>时间 UTC</th><th>震级</th><th>位置</th><th>深度 km</th></tr></thead>
+      <tbody>
+        <tr><td class="n">22:34</td><td class="n">4.5</td><td>斐济地区</td><td class="n">551.9</td></tr>
+        <tr class="hl"><td class="n">22:31</td><td class="n">5.1</td><td>巴布亚新几内亚 科科波南东南 129 km</td><td class="n">10</td></tr>
+        <tr class="hl"><td class="n">22:06</td><td class="n">4.7</td><td>巴布亚新几内亚 科科波南西南 147 km</td><td class="n">10</td></tr>
+        <tr><td class="n">19:32</td><td class="n">5.2</td><td>汤加 奥霍努阿东南偏东 71 km</td><td class="n">10</td></tr>
+        <tr><td class="n">16:12</td><td class="n">4.5</td><td>巴拿马 里奥格兰德附近</td><td class="n">10</td></tr>
+        <tr><td class="n">15:35</td><td class="n">4.7</td><td>圣基茨和尼维斯 桑迪波因特镇西南 20 km</td><td class="n">150.0</td></tr>
+        <tr><td class="n">14:30</td><td class="n">4.6</td><td>卡尔斯伯格海岭（印度洋西北部）</td><td class="n">10</td></tr>
+        <tr><td class="n">12:42</td><td class="n">4.5</td><td>新西兰 克马德克群岛</td><td class="n">10</td></tr>
+        <tr><td class="n">08:00</td><td class="n">5.2</td><td>印度尼西亚 鲁滕北西北 55 km</td><td class="n">10</td></tr>
+        <tr><td class="n">00:28</td><td class="n">4.8</td><td>巴布亚新几内亚 凯南图东南 31 km</td><td class="n">124.1</td></tr>
+      </tbody>
+    </table>
+    </div>
+  </details>
+</section>
+
+<section aria-labelledby="s-hazard">
+  <div class="eyebrow">地球系统 · 灾害预警</div>
+  <h2 id="s-hazard">全球灾害预警（GDACS）</h2>
+  <div class="focus">
+    <article class="item red">
+      <div class="meta"><span class="pill">红色</span><span class="mono">10-14 → 10-18</span><span>关岛、北马里亚纳群岛</span></div>
+      <h3>气旋：“Champi”</h3>
+      <p>本期唯一的红色预警。GDACS 估计约 17.5 万人处于 1 级以上风力范围，脆弱性中等，给出的最大风速约 259 公里/小时；该条目的整体事件级别为红色，但最新一个时次的分段预警已降为绿色，与台风远离关岛一致。实况见“今日焦点”。</p>
+    </article>
+    <article class="item orange">
+      <div class="meta"><span class="pill">橙色</span><span class="mono">10-16 → 10-17</span><span>库克群岛</span></div>
+      <h3>气旋：“Wati”（WATI-26，上期编号 ONE-26）</h3>
+      <p>本期唯一的橙色预警。约 4,982 人可能处于 1 级以上风力范围，脆弱性中等；条目中风速前后不一（130 与 120 公里/小时），本期不予引用。暂未查到当地的影响报道。</p>
+    </article>
+    <article class="item green">
+      <div class="meta"><span class="pill">绿色</span><span class="mono">10-13 → 10-18</span><span>墨西哥外海</span></div>
+      <h3>气旋：“特鲁迪”</h3>
+      <p>截至 18 日 03:00 UTC 时次仍为绿色：GDACS 估计 1 级以上风力范围内人口为 0，但约 127 万人处于热带风暴级风力范围；风速字段同样前后矛盾，本期不予引用。</p>
+    </article>
+    <article class="item green">
+      <div class="meta"><span class="pill">绿色</span><span class="mono">10-14 → 10-17</span><span>多国</span></div>
+      <h3>地震：4 条绿色预警</h3>
+      <p>17 日巴基斯坦 5.7 级地震（约 1,765 人处于 7 度及以上烈度范围），16 日俄罗斯 6.9 级（震源深约 143 公里，约 1.4 万人处于 5 度烈度范围），15 日美国 5.6 级，14 日斐济 5.9 级深源地震（约 585 公里）。均为绿色，未显示重大人口影响。</p>
+    </article>
+    <article class="item green">
+      <div class="meta"><span class="pill">绿色</span><span class="mono">10-13 → 10-17</span><span>多国</span></div>
+      <h3>野火与洪水</h3>
+      <p>野火可见记录 18 处：澳大利亚 13 处，巴西 2 处，中国、苏丹、玻利维亚各 1 处。澳大利亚各处面积约 5,950–11,700 公顷，均未报告受影响人口（其中一条记录被截断）；中国一处约 9,660 公顷、约 2,500 人受影响，仍是受影响人口最多的野火；巴西一处约 5,270 公顷、119 人受影响，苏丹一处约 6,090 公顷、55 人受影响。洪水类绿色预警 1 条：利比亚 2 人死亡、5 人流离失所。</p>
+    </article>
+  </div>
+  <p class="note">GDACS RSS 本次返回的是 18 日 05:45 UTC 版本，标称 211 条记录但仅显示 26 条，最后一条被截断。以上为可见范围内的统计，未见火山、干旱类条目，但不排除被截断部分中存在。</p>
+</section>
+
+<section aria-labelledby="s-world">
+  <div class="eyebrow">要闻</div>
+  <h2 id="s-world">其他值得知道的事</h2>
+  <ul class="plain">
+    <li>印度加尔各答杜尔迦节活动踩踏事件死亡人数升至 19 人，多为妇女和儿童，另有 25 人住院；警方带走约 10 名主办方和安保人员问询。</li>
+    <li>中国国家铁路集团数据显示，前三季度全国铁路发送旅客 37.1 亿人次，同比增长 4.8%，创同期新高；日均开行旅客列车 11,511 列，境外旅客超过 1,900 万人次、增长 33.4%。</li>
+    <li>香港皇岗口岸重建后首个周末通关旅客超过 13 万人次。国际货币基金组织将香港经济增长预测上调至 3.8%。</li>
+    <li>内蒙古乌兰察布、呼和浩特一带的算力规模不到两年增长近四倍，截至 8 月达 36.3 万 PFLOPS；全国前十大算力服务商中有 9 家在当地布局，依靠气候自然冷却和风光电，电价低至每千瓦时约 0.35 元。</li>
+    <li>阿尔巴尼亚首都地拉那的反政府抗议持续多日，最高法院办公楼起火，警方使用橡皮子弹、水炮和催泪瓦斯，总理拉马拒绝辞职。</li>
+    <li>约旦河西岸塔伊巴附近，欧盟外交人员探访橄榄采摘农户时遭以色列定居者袭击，一名法国市长称被蒙面定居者殴打；欧盟要求追责。</li>
+    <li>海湾合作委员会谴责胡塞武装对沙特的袭击，也门战事已致超过 23.3 万人流离失所；沙特民防部门称一枚胡塞武装发射物击中南部居民区，6 人受伤，胡塞武装则称沙特 24 小时内实施了 53 次空袭。</li>
+    <li>泽连斯基表示必须结束俄乌战争，并称基辅与华盛顿保持几乎不间断的沟通。特朗普在社交媒体上表态支持内塔尼亚胡参加 10 月 27 日的以色列议会选举。</li>
+    <li>巴基斯坦军方称对来自阿富汗一侧的越境射击作出回应。</li>
+  </ul>
+</section>
+
+<footer>
+  <div><b>关于本简报</b>　数据来自公开信息源，由 AI 每日自动采集、筛选和撰写，可能存在疏漏，重要信息请以原始来源为准。时间如无特别说明均为 UTC。本期说明：USGS“过去一天”订阅源返回的是 18 日 02:40 生成的过期缓存，地震数据改用 USGS 事件查询接口（10 月 18 日 UTC 全天，生成于 23:52，此后发生的地震未计入）；GDACS RSS 为 18 日 05:45 版本且被截断，因此<b>本期灾害预警缺少 18 日 05:45 之后的更新及被截断部分</b>。半岛电视台除法国骚乱一文外，相关要闻仅依据其 RSS 摘要撰写。台风“Champi”的灾情为过境当天的初步信息，正式损失评估尚未公布，北马里亚纳群岛的情况本期未能获取；飓风“特鲁迪”未找到墨西哥官方通报及伤亡、停电报道，焦点内容依据路透社转述的美国国家飓风中心信息撰写。新华网英文版本期未见自动驾驶或航空相关头条。</div>
+  <div>
+    <b>来源</b>
+    <ol>
+      <li><a href="https://earthquake.usgs.gov/earthquakes/map/" target="_blank" rel="noopener">USGS 地震目录（M4.5+，10 月 18 日）</a></li>
+      <li><a href="https://www.gdacs.org/" target="_blank" rel="noopener">GDACS 全球灾害预警与协调系统</a></li>
+      <li><a href="https://watchers.news/2026/10/18/champi-briefly-reaches-super-typhoon-strength-after-its-closest-approach-to-guam-causes-widespread-outages/" target="_blank" rel="noopener">The Watchers：“Champi”掠过关岛后短暂达到超强台风，造成大范围停电</a></li>
+      <li><a href="https://www.rustourismnews.com/2026/10/18/super-typhoon-champi-leaves-half-of-guam-without-power-as-flight-cancellations-extend-into-monday/" target="_blank" rel="noopener">RusTourismNews：关岛一半断电，航班取消延续至周一</a></li>
+      <li><a href="https://www.gmanetwork.com/news/topstories/world/1006328/hurricane-trudy-lashes-mexico-s-pacific-coast-but-is-set-to-weaken/story/" target="_blank" rel="noopener">GMA News（路透社）：飓风“特鲁迪”吹袭墨西哥太平洋海岸，将减弱</a></li>
+      <li><a href="https://www.aljazeera.com/news/2026/10/18/macron-denounces-frances-nationwide-rioting-looting" target="_blank" rel="noopener">Al Jazeera：马克龙谴责法国全国性骚乱与抢劫</a></li>
+      <li><a href="https://english.news.cn/20261018/82ed23bdf18c4e30a47c4aa981682c56/c.html" target="_blank" rel="noopener">新华网英文版：印度踩踏事件死亡人数升至 19 人</a></li>
+      <li><a href="https://english.news.cn/20261018/b9f76df86f4f404f9b79f6ac2ecfec5a/c.html" target="_blank" rel="noopener">新华网英文版：前三季度铁路旅客发送量创新高</a></li>
+      <li><a href="https://english.news.cn/20261018/b0c0dd3a314d493d86edc422a8e2b1b5/c.html" target="_blank" rel="noopener">新华网英文版：皇岗口岸重建后首个周末</a></li>
+      <li><a href="https://english.news.cn/20261018/0e700b91c957407bae43e8b38f8e3d07/c.html" target="_blank" rel="noopener">新华网英文版：IMF 上调香港增长预测</a></li>
+      <li><a href="https://english.news.cn/20261018/275af7ad0d984f2f94335c22f2af7ae3/c.html" target="_blank" rel="noopener">新华网英文版：内蒙古算力枢纽</a></li>
+      <li><a href="https://www.aljazeera.com/news/2026/10/18/chaos-in-tirana-demonstrators-determined-to-not-give-up-so-easily" target="_blank" rel="noopener">Al Jazeera：地拉那抗议进入第六天</a></li>
+      <li><a href="https://www.aljazeera.com/video/newsfeed/2026/10/18/albania-protests-supreme-court-fire" target="_blank" rel="noopener">Al Jazeera：阿尔巴尼亚最高法院起火</a></li>
+      <li><a href="https://www.aljazeera.com/news/2026/10/18/eu-condemns-israeli-settler-attack-on-diplomats-in-occupied-west-bank" target="_blank" rel="noopener">Al Jazeera：欧盟谴责定居者袭击外交人员</a></li>
+      <li><a href="https://www.aljazeera.com/video/newsfeed/2026/10/18/18-10-sv-mayor-of-france-assaulted-by-settlers-ps" target="_blank" rel="noopener">Al Jazeera：法国市长在西岸遭袭</a></li>
+      <li><a href="https://www.aljazeera.com/news/2026/10/18/gcc-condemns-houthi-attacks-on-saudi-arabia-as-yemen-fighting-intensifies" target="_blank" rel="noopener">Al Jazeera：海合会谴责胡塞武装袭击沙特</a></li>
+      <li><a href="https://english.news.cn/20261019/1290a01ba13a4c7db946ed211d4aeb30/c.html" target="_blank" rel="noopener">新华网英文版：胡塞武装发射物击中沙特南部居民区</a></li>
+      <li><a href="https://english.news.cn/20261018/458517027327461ea267b8bc70535081/c.html" target="_blank" rel="noopener">新华网英文版：胡塞武装称沙特 24 小时空袭 53 次</a></li>
+      <li><a href="https://www.aljazeera.com/news/2026/10/18/russias-war-on-ukraine-must-be-brought-to-an-end-zelenskyy-says" target="_blank" rel="noopener">Al Jazeera：泽连斯基称必须结束战争</a></li>
+      <li><a href="https://www.aljazeera.com/news/2026/10/18/trump-endorses-netanyahu-in-israeli-legislative-elections" target="_blank" rel="noopener">Al Jazeera：特朗普表态支持内塔尼亚胡</a></li>
+      <li><a href="https://english.news.cn/20261018/ff9f6ed40082412faeed5cb5cfa2fde4/c.html" target="_blank" rel="noopener">新华网英文版：巴基斯坦军方回应越境射击</a></li>
+    </ol>
+  </div>
+</footer>
+</div>
+
+</body></html>
