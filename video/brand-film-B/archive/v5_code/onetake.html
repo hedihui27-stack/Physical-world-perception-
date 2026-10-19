@@ -1,0 +1,19 @@
+<!doctype html><html><head><meta charset="utf-8"><style>html,body{margin:0;width:1920px;height:1080px;overflow:hidden;background:#05070f}canvas{position:absolute;left:0;top:0}</style></head><body>
+<canvas id="c" width="1920" height="1080"></canvas>
+<script src="helpers_film.js"></script><script src="state_film.js"></script><script src="scenes_film.js"></script><script src="scenes_d.js"></script><script src="scene_v.js"></script><script src="onetake.js"></script>
+<script>
+window.CP={k:0,t0:0};window.__T=0;bg=()=>starsBG(window.__T);
+const out=document.getElementById('c').getContext('2d');
+const mk=()=>{const c=document.createElement('canvas');c.width=W;c.height=H;return c};
+const A=mk(),B=mk(),C=mk();
+window.DUR=22;
+function lay(buf,fn,a){g=buf.getContext('2d');fn();out.globalAlpha=a;out.drawImage(buf,0,0);out.globalAlpha=1}
+window.render=function(T){window.__T=T;out.fillStyle='#05070f';out.fillRect(0,0,W,H);
+  if(T<11.2)lay(A,()=>drawGlobeOT(T),1);
+  if(T>9.9&&T<17.4)lay(B,()=>(DC?drawCityDC(T):drawCityOT(T)),T<11.2?ease(clamp((T-9.9)/1.3)):1);
+  if(T>16.4){CP.t0=16.4-4.6;CP.k=0;lay(C,()=>sceneVCloud(T),ease(clamp((T-16.4)/0.9)))}
+  g=out;motes(T);glow(out.canvas,out);
+  if(T<0.8){g.fillStyle=`rgba(5,7,15,${1-T/0.8})`;g.fillRect(0,0,W,H)}
+  if(T>DUR-0.6){g.fillStyle=`rgba(5,7,15,${clamp((T-(DUR-0.6))/0.6)})`;g.fillRect(0,0,W,H)}};
+window.init=async()=>{D=await (await fetch('data.json')).json();WS=await (await fetch('ws.json')).json();DC=await (await fetch('dc.json')).json();const img=new Image();img.src='land.png';await img.decode();const cv=document.createElement('canvas');cv.width=1800;cv.height=900;const x=cv.getContext('2d');x.drawImage(img,0,0);const px=x.getImageData(0,0,1800,900).data;D.landCN=[];for(let la=15;la<=52;la+=0.3)for(let lo=86;lo<=140;lo+=0.35){const X=Math.round((lo+180)/360*1799),Y=Math.round((90-la)/180*899);if(px[(Y*1800+X)*4]>0){const sea=[[1,0],[-1,0],[0,1],[0,-1]].some(([dx,dy])=>px[((Y+dy*2)*1800+X+dx*2)*4]===0);D.landCN.push([la,lo,sea])}}const fi=new Image();fi.src='frame1.jpg';await fi.decode();VC.img=fi;VC.noWords=1;return 1};
+</script></body></html>

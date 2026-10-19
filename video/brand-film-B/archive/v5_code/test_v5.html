@@ -1,0 +1,9 @@
+<!doctype html><html><head><meta charset="utf-8"><style>html,body{margin:0;width:1920px;height:1080px;overflow:hidden;background:#05070f}</style></head><body>
+<canvas id="c" width="1920" height="1080"></canvas>
+<script src="helpers_film.js"></script><script src="state_film.js"></script><script src="scenes_film.js"></script><script src="scenes_d.js"></script><script src="scene_v.js"></script><script src="scene_sat.js"></script><script src="icons_v4.js"></script><script src="onetake.js"></script><script src="journey.js"></script><script src="v5_heavy.js"></script><script src="v5_b2.js"></script><script src="v5_b3.js"></script>
+<script>
+window.CP={k:0,t0:0};window.__T=0;bg=()=>starsBG(window.__T);
+const out=document.getElementById('c').getContext('2d');
+window.shot=(name,lt)=>{window.__T=lt;CP.t0=0;g=out;out.fillStyle='#05070f';out.fillRect(0,0,W,H);window[name](lt);g=out;motes(lt);glow(out.canvas,out)};
+window.init=async()=>{D=await (await fetch('data.json')).json();WS=await (await fetch('ws.json')).json();DC=await (await fetch('dc.json')).json();C275=await (await fetch('cities275.json')).json();const img=new Image();img.src='land.png';await img.decode();const cv=document.createElement('canvas');cv.width=1800;cv.height=900;const x=cv.getContext('2d');x.drawImage(img,0,0);const px=x.getImageData(0,0,1800,900).data;D.landCN=[];for(let la=15;la<=52;la+=0.3)for(let lo=86;lo<=140;lo+=0.35){const X=Math.round((lo+180)/360*1799),Y=Math.round((90-la)/180*899);if(px[(Y*1800+X)*4]>0){const sea=[[1,0],[-1,0],[0,1],[0,-1]].some(([dx,dy])=>px[((Y+dy*2)*1800+X+dx*2)*4]===0);D.landCN.push([la,lo,sea])}}return 1};
+</script></body></html>

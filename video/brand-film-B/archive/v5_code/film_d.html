@@ -1,0 +1,52 @@
+<!doctype html><html><head><meta charset="utf-8"><style>html,body{margin:0;width:1920px;height:1080px;overflow:hidden;background:#05070f}canvas{position:absolute;left:0;top:0}</style></head><body>
+<canvas id="c" width="1920" height="1080"></canvas>
+<script src="helpers_film.js"></script><script src="state_film.js"></script><script src="scenes_film.js"></script><script src="scenes_d.js"></script>
+<script>
+SC.state=sceneState;
+window.CP={k:0,t0:0};
+const out=document.getElementById('c').getContext('2d');
+const mk=()=>{const c=document.createElement('canvas');c.width=W;c.height=H;return c};
+const bufA=mk(),bufB=mk();
+// [scene, start, end, readout] — starts aligned to narration line onsets
+window.SEG=[
+ ['index',0,10.33,'数字世界 · 已被索引'],
+ ['taishan',10.33,16.02,'已知：位置　未知：此刻'],
+ ['parking',16.02,22.86,'已知：位置　未知：空位与 30 分钟后'],
+ ['dark',22.86,26.05,'物理世界的「现在」· 尚未被 AI 索引'],
+ ['wake',26.05,34.38,'SeeMind · 物理世界大模型'],
+ ['layers',34.38,42.42,'天空地网 · 多层感知'],
+ ['sky',42.42,49.48,'32 颗在用遥感、雷达卫星 · 任意地点最新影像'],
+ ['ground',49.48,54.42,'60 万+ 实时感知点 · 196 个国家和地区'],
+ ['events',54.42,59.73,'477 个信源 · 每天 2–4 万件事件'],
+ ['base',59.73,65.92,'275 城三维底座 · 所有模态共用的空间锚点'],
+ ['experts',65.92,78.62,'一基多专 · 专家模型就地看懂，基础大模型融合推演'],
+ ['tokens',78.62,92.16,'Token = 带时空坐标的现实切片 · 记忆 = 城市状态图'],
+ ['state',92.16,101.02,'世界状态 · 此刻 → +5 分钟 → +30 分钟 → +1 小时'],
+ ['verify',101.02,117.59,'现实自验证 · 每条预测到期由现实判分'],
+ ['loop',117.59,120.90,'行动改变现实 · 现实训练模型'],
+ ['china',120.90,124.08,'11 座城市在线 · 40+ 城市对接中'],
+ ['dongcheng',124.08,133.47,'北京东城 · 不增加人力编制'],
+ ['ask',133.47,140.09,'南京 · 用一句话问现实'],
+ ['agi',140.09,147.51,'接入现实 · AGI 形成过程中的训练阶段'],
+ ['outro',147.51,154.6,'']];
+window.DUR=154.6;
+const XF=0.9;
+function drawScene(i,t,k,ctx){g=ctx;const s=SEG[i];CP.k=k;CP.t0=s[1];
+  if(s[0]==='outro'){CP.t0=SEG[i-1][1];CP.k=1;sceneAGI(t);return}
+  SC[s[0]](t,{});}
+window.render=function(T){
+  out.fillStyle='#05070f';out.fillRect(0,0,W,H);
+  let cur=SEG.findIndex(s=>T>=s[1]&&T<s[2]);if(cur<0)cur=SEG.length-1;
+  const s=SEG[cur];const k=clamp((T-s[1])/(s[2]-s[1]));
+  drawScene(cur,T,k,bufA.getContext('2d'));out.globalAlpha=1;out.drawImage(bufA,0,0);
+  if(cur<SEG.length-1&&T>s[2]-XF){const a=ease(clamp((T-(s[2]-XF))/XF));drawScene(cur+1,T,0,bufB.getContext('2d'));out.globalAlpha=a;out.drawImage(bufB,0,0);out.globalAlpha=1}
+  g=out;
+  if(s[3]){const a=clamp((T-s[1]-0.5)/0.6)*clamp((s[2]-XF-T)/0.5);g.globalAlpha=a;g.fillStyle='rgba(255,212,92,0.9)';g.fillRect(80,92,4,26);text(s[3],98,114,26,'#e9eef9','left',500,3);g.globalAlpha=1}
+  if(s[0]==='outro'){const t0=T-s[1];
+    const a1=clamp(t0/0.8)*clamp((1.75-t0)/0.4);g.globalAlpha=a1;g.fillStyle='rgba(5,7,15,0.5)';g.fillRect(0,0,W,H);text('让世界训练智能',W/2,560,76,'#f2f6ff','center',700,14);g.globalAlpha=1;
+    const a2=clamp((t0-1.7)/0.8)*clamp((7.0-t0)/0.6);g.globalAlpha=a2;g.fillStyle='rgba(5,7,15,0.62)';g.fillRect(0,0,W,H);text('SeeTime',W/2,530,110,'#f2f6ff','center',900,6);text('时印 · 洞察当下，预见未来',W/2,612,34,'#b9c8e0','center',400,12);text('www.seetimeai.com',W/2,690,24,'#7f8db0','center',400,4);g.globalAlpha=1}
+  if(T<1.0){g.fillStyle=`rgba(5,7,15,${1-T/1.0})`;g.fillRect(0,0,W,H)}
+  if(T>DUR-0.8){g.fillStyle=`rgba(5,7,15,${clamp((T-(DUR-0.8))/0.8)})`;g.fillRect(0,0,W,H)}
+};
+window.init=async()=>{D=await (await fetch('data.json')).json();const img=new Image();img.src='land.png';await img.decode();const cv=document.createElement('canvas');cv.width=1800;cv.height=900;const x=cv.getContext('2d');x.drawImage(img,0,0);const px=x.getImageData(0,0,1800,900).data;D.landCN=[];for(let la=15;la<=52;la+=0.3)for(let lo=86;lo<=140;lo+=0.35){const X=Math.round((lo+180)/360*1799),Y=Math.round((90-la)/180*899);if(px[(Y*1800+X)*4]>0){const sea=[[1,0],[-1,0],[0,1],[0,-1]].some(([dx,dy])=>px[((Y+dy*2)*1800+X+dx*2)*4]===0);D.landCN.push([la,lo,sea])}}return 1};
+</script></body></html>

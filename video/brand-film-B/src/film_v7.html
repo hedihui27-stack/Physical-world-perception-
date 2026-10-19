@@ -1,0 +1,26 @@
+<!doctype html><html><head><meta charset="utf-8"><style>html,body{margin:0;width:1920px;height:1080px;overflow:hidden;background:#05070f}canvas{position:absolute;left:0;top:0}</style></head><body>
+<canvas id="c" width="1920" height="1080"></canvas>
+<script src="helpers_film.js"></script><script src="state_film.js"></script><script src="scenes_film.js"></script><script src="scenes_d.js"></script><script src="scene_v.js"></script><script src="scene_sat.js"></script><script src="icons_v4.js"></script><script src="onetake.js"></script><script src="journey.js"></script><script src="v5_heavy.js"></script><script src="v5_b2.js"></script><script src="v5_b3.js"></script><script src="v6_base.js"></script><script src="v6_city.js"></script><script src="v6_time.js"></script><script src="v6_experts.js"></script><script src="v6_digital.js"></script><script src="v6_end.js"></script><script src="v7_color.js"></script><script src="v7_seemind.js"></script><script src="v7_nanjing.js"></script><script src="v7_end.js"></script><script src="v7_fly.js"></script><script src="v7_digital.js"></script><script src="v7_park.js"></script><script src="v7_tech1.js"></script><script src="v7_look.js"></script><script src="v7_tech2.js"></script><script src="v7_tech3.js"></script><script src="v7_tech4.js"></script><script src="v7_close.js"></script><script src="v7_vary.js"></script><script src="v7_fix5.js"></script>
+<script>
+window.CP={k:0,t0:0};window.__T=0;bg=()=>starsBG(window.__T);VC.noWords=1;
+const out=document.getElementById('c').getContext('2d');
+const mk=()=>{const c=document.createElement('canvas');c.width=W;c.height=H;return c};const bufA=mk(),bufB=mk();
+function sceneDescend(t){const sT=12+5*clamp((t-82.3)/(87.0-82.3));drawCityDC(sT)}
+window.SEG=[
+ ['shotDigital',0,13.3],['shotTaishan',13.3,19.0],['shotParking',19.0,25.9],['shotPeel',25.9,29.1],['shotWake',29.1,37.9],['shotShells',37.9,46.1],
+ ['shotSats',46.1,53.1],['shotPoints',53.1,56.0],['shotEyes',56.0,58.1],['shotEvents',58.1,63.4],['shotCoord',63.4,69.6],['shotExperts',69.6,82.3],
+ ['sceneDescend',82.3,87.6],['sceneVCloud',87.6,97.1,82.1],['shotPredict',97.1,106.0],['shotMatch',106.0,108.9],['shotTimeWorlds',108.9,115.8],['shotConverge',115.8,122.5],
+ ['shotFlywheel',122.5,125.8],['shotChina5',125.8,129.0],['shotDCDay',129.0,138.4],['shotNanjing',138.4,143.8],['shotAGI',143.8,158.0]];
+window.DUR=158.0;const XF=0.9;
+function drawScene(i,t,ctx){g=ctx;const s=SEG[i];CP.t0=s[3]??s[1];CP.k=clamp((t-s[1])/(s[2]-s[1]));window[s[0]](t)}
+window.render=function(T){window.__T=T;out.fillStyle='#06070a';out.fillRect(0,0,W,H);
+  let cur=SEG.findIndex(s=>T>=s[1]&&T<s[2]);if(cur<0)cur=SEG.length-1;const s=SEG[cur];
+  drawScene(cur,T,bufA.getContext('2d'));out.globalAlpha=1;out.drawImage(bufA,0,0);
+  if(cur<SEG.length-1&&T>s[2]-XF){const a=ease(clamp((T-(s[2]-XF))/XF));drawScene(cur+1,T,bufB.getContext('2d'));out.globalAlpha=a;out.drawImage(bufB,0,0);out.globalAlpha=1}
+  g=out;motes(T);glow(out.canvas,out);
+  grade(out);endCard(T);
+  if(T>DUR-0.7){g.fillStyle=`rgba(6,7,10,${clamp((T-(DUR-0.7))/0.7)})`;g.fillRect(0,0,W,H)}};
+window.init=async()=>{D=await (await fetch('data.json')).json();WS=await (await fetch('ws.json')).json();DC=await (await fetch('dc.json')).json();C275=await (await fetch('cities275.json')).json();BLK=await (await fetch('block.json')).json();await LOGO.decode();try{NJ=await (await fetch('nj.json')).json()}catch(e){NJ=null}
+  const img=new Image();img.src='land.png';await img.decode();const cv=document.createElement('canvas');cv.width=1800;cv.height=900;const x=cv.getContext('2d');x.drawImage(img,0,0);const px=x.getImageData(0,0,1800,900).data;D.landCN=[];for(let la=15;la<=52;la+=0.3)for(let lo=86;lo<=140;lo+=0.35){const X=Math.round((lo+180)/360*1799),Y=Math.round((90-la)/180*899);if(px[(Y*1800+X)*4]>0){const sea=[[1,0],[-1,0],[0,1],[0,-1]].some(([dx,dy])=>px[((Y+dy*2)*1800+X+dx*2)*4]===0);D.landCN.push([la,lo,sea])}}
+  const fi=new Image();fi.src='frame_dc.jpg';await fi.decode();VC.img=fi;return 1};
+</script></body></html>
