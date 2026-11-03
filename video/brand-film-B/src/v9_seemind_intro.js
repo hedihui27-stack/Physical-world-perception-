@@ -2,7 +2,7 @@
 // 解说（成片原时间）：正在构建物理世界大模型 SeeMind 29.7–32.6 · 可搜索 32.9 · 可预测 34.7 · 智能体据此行动 35.6
 const _wake9=shotWake;
 shotWake=function(t){_wake9(t);const u=t-28.2;
-  const grow=ease(clamp((t-29.8)/1.3)),lift=ease(clamp((t-32.7)/1.0)),la=clamp((t-31.2)/0.5);if(grow<=0)return;
+  const grow=ease(clamp((t-29.8)/1.3)),lift=ease(clamp((t-32.45)/0.8)),la=clamp((t-31.2)/0.5);if(grow<=0)return;
   // the model sits over the district centre, then rises to the top of the frame and stays as the source of what follows
   const D0=6.2;const base=[M.p[0]+M.f[0]*D0+M.u[0]*lerp(0,1.55,lift),M.p[1]+M.f[1]*D0+M.u[1]*lerp(0,1.55,lift),M.p[2]+M.f[2]*D0+M.u[2]*lerp(0,1.55,lift)];const mp=lerp(0.19,0.11,lift)*lerp(0.6,1,grow);
   const sv=[MXP,MXS],X0=XC.slice();MXP=mp;MXS=mp*0.7;XC[0]=base[0];XC[1]=base[1];XC[2]=base[2];
